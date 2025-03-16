@@ -1,7 +1,7 @@
 for prisma:
     docker: docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword postgres
-    migrate database: prisma migrate dev
-    generate client: prisma generate client
+    migrate database: npm run db:migrate:dev
+    generate client: npm run db:generate
 
 for kafka:
     docker: docker run -p 9092:9092 apache/kafka:3.7.1
