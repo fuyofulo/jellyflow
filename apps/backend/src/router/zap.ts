@@ -1,7 +1,6 @@
 import { Router, Request, Response } from "express";
 import { authMiddleware } from "../middleware";
 import { PrismaClient } from ".prisma/client";
-import { ZapCreateSchema } from "../types";
 
 const prismaClient = new PrismaClient();
 const router = Router();
