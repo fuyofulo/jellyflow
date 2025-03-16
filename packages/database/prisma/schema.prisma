@@ -19,6 +19,7 @@ model User {
   email    String  @unique
   password String?  // Made optional
   googleId String? @unique  // Added Google OAuth ID
+  verified Boolean @default(false) // will be using email verification for this
   zaps     Zap[]
 }
 
