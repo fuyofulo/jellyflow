@@ -51,51 +51,68 @@ typedRouter.post("/signup", async (req: Request, res: Response) => {
   }
 });
 
-typedRouter.post(
-  "/signin",
-  authMiddleware,
-  async (req: Request, res: Response) => {
-    const body = req.body;
-    const parsedData = SignInSchema.safeParse(body);
+typedRouter.post("/signin", async (req: Request, res: Response) => {
+  const body = req.body;
+  const parsedData = SignInSchema.safeParse(body);
 
-    if (!parsedData.success) {
-      return res.status(411).json({
-        message: "Incorrect inputs",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(parsedData.data.password, 10);
-
-    const user = await prismaClient.user.findFirst({
-      where: {
-        email: parsedData.data.email,
-      },
-    });
-
-    if (!user) {
-      return res.status(403).json({
-        message: "Invalid username or password",
-      });
-    }
-
-    const passwordMatch = await bcrypt.compare(
-      parsedData.data.password,
-      hashedPassword
-    );
-
-    if (!passwordMatch) {
-      return res.status(401).json({
-        message: "Invalid username or password",
-      });
-    }
-
-    const token = jwt.sign({ id: user.id }, JWT_PASSWORD);
-
-    res.json({
-      message: "Login successful",
-      token: token,
+  if (!parsedData.success) {
+    return res.status(411).json({
+      message: "Incorrect inputs",
     });
   }
-);
+
+  const hashedPassword = await bcrypt.hash(parsedData.data.password, 10);
+
+  const user = await prismaClient.user.findFirst({
+    where: {
+      email: parsedData.data.email,
+    },
+  });
+
+  if (!user) {
+    return res.status(403).json({
+      message: "Invalid username or password",
+    });
+  }
+
+  const passwordMatch = await bcrypt.compare(
+    parsedData.data.password,
+    hashedPassword
+  );
+
+  if (!passwordMatch) {
+    return res.status(401).json({
+      message: "Invalid username or password",
+    });
+  }
+
+  const token = jwt.sign({ id: user.id }, JWT_PASSWORD);
+
+  res.json({
+    message: "Login successful",
+    token: token,
+  });
+});
+
+typedRouter.get("/", authMiddleware, async (req: Request, res: Response) => {
+  if (!req.id) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const userId = parseInt(req.id);
+  const user = await prismaClient.user.findFirst({
+    where: {
+      id: userId,
+    },
+    select: {
+      name: true,
+      email: true,
+    },
+  });
+
+  return res.json({
+    user,
+  });
+});
 
 export const userRouter = typedRouter;

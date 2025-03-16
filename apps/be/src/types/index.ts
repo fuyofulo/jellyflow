@@ -14,3 +14,12 @@ export const SignInSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required")
 });
+
+export const ZapCreateSchema = z.object({
+  availableTriggerId: z.string(),
+  triggerMetadata: z.any().optional(),
+  actions: z.array(z.object({
+      availableActionId: z.string(),
+      actionMetadata: z.any().optional(),
+  }))
+});
