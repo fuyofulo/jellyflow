@@ -42,9 +42,10 @@ typedRouter.post("/signup", async (req: Request, res: Response) => {
         email: parsedData.data.email,
         password: hashedPassword,
         name: parsedData.data.name,
-        verified: false, // Explicitly set verification status
+        verified: false,
       },
     });
+    return res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error("Signup error:", error);
     return res.status(500).json({ message: "Signup failed" });
