@@ -45,6 +45,7 @@ typedRouter.post("/signup", async (req: Request, res: Response) => {
         verified: false,
       },
     });
+    console.log(`${parsedData.data.name} just signed up with email ${parsedData.data.email}`);
     return res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error("Signup error:", error);
@@ -82,13 +83,14 @@ typedRouter.post("/signin", async (req: Request, res: Response) => {
   );
 
   if (!passwordMatch) {
+    console.log(`someone just tried to sign in with email ${parsedData.data.email}`);
     return res.status(401).json({
       message: "Invalid username or password",
     });
   }
 
   const token = jwt.sign({ id: user.id }, JWT_PASSWORD);
-
+  console.log(`${user.name} just signed in with email ${user.email}`);
   res.json({
     message: "Login successful",
     token: token,

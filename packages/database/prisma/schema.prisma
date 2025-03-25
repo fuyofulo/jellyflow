@@ -17,29 +17,32 @@ model User {
   id       Int     @id @default(autoincrement())
   name     String
   email    String  @unique
-  password String?  // Made optional
-  googleId String? @unique  // Added Google OAuth ID
+  password String? // Made optional
+  googleId String? @unique // Added Google OAuth ID
   verified Boolean @default(false) // will be using email verification for this
   zaps     Zap[]
 }
 
 model Zap {
-  id         String   @id @default(uuid())
-  AvailableTriggerId  String
-  userId     Int
-  trigger    Trigger?
-  actions    Action[]
-  zapRuns    ZapRun[]
-  user       User     @relation(fields: [userId], references: [id])
+  id                 String   @id @default(uuid())
+  zapName            String   @default("Untitled Zap")
+  AvailableTriggerId String
+  userId             Int
+  isActive           Boolean  @default(true)
+  lastEdited         DateTime @default(now())
+  trigger            Trigger?
+  actions            Action[]
+  zapRuns            ZapRun[]
+  user               User     @relation(fields: [userId], references: [id])
 }
 
 model Trigger {
-  id         String           @id @default(uuid())
-  zapId      String           @unique
-  triggerId  String
-  metadata   Json             @default("{}")
-  type       AvailableTrigger @relation(fields: [triggerId], references: [id])
-  zap        Zap              @relation(fields: [zapId], references: [id])
+  id        String           @id @default(uuid())
+  zapId     String           @unique
+  triggerId String
+  metadata  Json             @default("{}")
+  type      AvailableTrigger @relation(fields: [triggerId], references: [id])
+  zap       Zap              @relation(fields: [zapId], references: [id])
 }
 
 model Action {
@@ -55,14 +58,12 @@ model Action {
 model AvailableAction {
   id      String   @id @default(uuid())
   name    String
-  image   String
   actions Action[]
 }
 
 model AvailableTrigger {
   id       String    @id @default(uuid())
   name     String
-  image    String
   triggers Trigger[]
 }
 
@@ -75,7 +76,7 @@ model ZapRun {
 }
 
 model ZapRunOutbox {
-  id       String  @id @default(uuid())
-  zapRunId String  @unique
-  zapRun   ZapRun  @relation(fields: [zapRunId], references: [id])
+  id       String @id @default(uuid())
+  zapRunId String @unique
+  zapRun   ZapRun @relation(fields: [zapRunId], references: [id])
 }
