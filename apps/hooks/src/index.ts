@@ -14,21 +14,26 @@ typedApp.post(
     const zapId = req.params.zapId;
     const body = req.body;
 
+    console.log(`${userId} just called the webhook for zap ${zapId}`);
+
     try {
       // First check if the zap exists
       const zap = await client.zap.findFirst({
         where: {
           id: zapId,
-          userId: parseInt(userId),
+          userId: userId,
         },
       });
 
       // Check if zap exists and is active (after fetch)
       if (!zap || !(zap as any).isActive) {
+        console.log("Zap not found or not active");
         return res.status(404).json({
           message: "Zap not found or not active",
         });
       }
+
+      console.log("zap found");
 
       // storing this trigger in both main and outbox database
       // we are using a transaction so that it gets stored in both or none
@@ -40,6 +45,7 @@ typedApp.post(
             metadata: body,
           },
         });
+        console.log(`ZapRun created with ID: ${run.id}`);
 
         // creating an outbox entry for the zaprun
         await tx.zapRunOutbox.create({
@@ -47,6 +53,7 @@ typedApp.post(
             zapRunId: run.id,
           },
         });
+        console.log(`Outbox entry created for ZapRun ID: ${run.id}`);
       });
 
       return res.json({
@@ -61,4 +68,6 @@ typedApp.post(
   }
 );
 
-app.listen(3000);
+app.listen(4000, () => {
+  console.log("Project is active at port 4000");
+});

@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
+  id       String  @id @default(cuid())
   name     String
   email    String  @unique
   password String? // Made optional
@@ -27,8 +27,9 @@ model Zap {
   id                 String   @id @default(uuid())
   zapName            String   @default("Untitled Zap")
   AvailableTriggerId String
-  userId             Int
+  userId             String
   isActive           Boolean  @default(true)
+  isPublished        Boolean  @default(false)
   lastEdited         DateTime @default(now())
   trigger            Trigger?
   actions            Action[]

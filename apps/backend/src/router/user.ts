@@ -102,7 +102,7 @@ typedRouter.get("/", authMiddleware, async (req: Request, res: Response) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const userId = parseInt(req.id);
+  const userId = req.id;
   const user = await prismaClient.user.findFirst({
     where: {
       id: userId,

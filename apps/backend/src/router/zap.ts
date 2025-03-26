@@ -29,7 +29,7 @@ typedRouter.post("/", authMiddleware, async (req: Request, res: Response) => {
   //     }]
   // }
 
-  const userId = parseInt(req.id);
+  const userId = req.id;
   const { availableTriggerId, triggerMetadata, actions } = req.body;
 
   try {
@@ -103,7 +103,7 @@ typedRouter.get("/", authMiddleware, async (req: Request, res: Response) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const userId = parseInt(req.id);
+  const userId = req.id;
   const zaps = await prismaClient.zap.findMany({
     where: {
       userId,
@@ -129,15 +129,78 @@ typedRouter.get("/", authMiddleware, async (req: Request, res: Response) => {
   });
 });
 
-typedRouter.get(
-  "/:zapId",
-  authMiddleware,
-  async (req: Request, res: Response) => {
+typedRouter.get("/published",authMiddleware,async (req: Request, res: Response) => {
     if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const userId = parseInt(req.id);
+    console.log(`${req.id} just fetched their published zaps`);
+
+    const userId = req.id;
+    const publishedZaps = await prismaClient.zap.findMany({
+      where: {
+        userId,
+        isPublished: true,
+      },
+      include: {
+        actions: {
+          include: {
+            type: true,
+          },
+        },
+        trigger: {
+          include: {
+            type: true,
+          },
+        },
+      },
+    });
+
+    return res.json({
+      zaps: publishedZaps,
+    });
+  }
+);
+
+typedRouter.get("/unpublished", authMiddleware, async (req: Request, res: Response) => {
+  if (!req.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    console.log(`${req.id} just fetched their unpublished zaps`);
+
+    const userId = req.id;
+    const unpublishedZaps = await prismaClient.zap.findMany({
+      where: {
+        userId,
+        isPublished: false,
+      },
+      include: {
+        actions: {
+          include: {
+            type: true,
+          },
+        },
+        trigger: {
+          include: {
+            type: true,
+          },
+        },
+      },
+    });
+
+    return res.json({
+      zaps: unpublishedZaps,
+    });
+  }
+);
+
+typedRouter.get("/:zapId", authMiddleware, async (req: Request, res: Response) => {
+    if (!req.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const userId = req.id;
     const zapId = req.params.zapId;
 
     const zap = await prismaClient.zap.findFirst({
@@ -167,17 +230,20 @@ typedRouter.get(
   }
 );
 
-typedRouter.post(
-  "/:zapId/edit",
-  authMiddleware,
-  async (req: Request, res: Response) => {
+typedRouter.post("/:zapId/edit", authMiddleware, async (req: Request, res: Response) => {
     if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const userId = parseInt(req.id);
+    const userId = req.id;
     const zapId = req.params.zapId;
-    const { availableTriggerId, triggerMetadata, actions, zapName } = req.body;
+    const {
+      availableTriggerId,
+      triggerMetadata,
+      actions,
+      zapName,
+      isPublished,
+    } = req.body;
 
     try {
       // Check if the zap exists and belongs to the user
@@ -243,6 +309,8 @@ typedRouter.post(
           zapName: zapName || "Untitled Zap",
           AvailableTriggerId: availableTriggerId,
           lastEdited: new Date(),
+          // Only update isPublished if it's provided in the request
+          ...(isPublished !== undefined && { isPublished }),
           trigger: {
             create: {
               triggerId: availableTriggerId,
@@ -282,15 +350,12 @@ typedRouter.post(
   }
 );
 
-typedRouter.post(
-  "/:zapId/toggle-active",
-  authMiddleware,
-  async (req: Request, res: Response) => {
+typedRouter.post("/:zapId/toggle-active", authMiddleware, async (req: Request, res: Response) => {
     if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const userId = parseInt(req.id);
+    const userId = req.id;
     const zapId = req.params.zapId;
 
     try {
@@ -340,15 +405,12 @@ typedRouter.post(
   }
 );
 
-typedRouter.post(
-  "/:zapId/delete",
-  authMiddleware,
-  async (req: Request, res: Response) => {
+typedRouter.post("/:zapId/delete", authMiddleware, async (req: Request, res: Response) => {
     if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const userId = parseInt(req.id);
+    const userId = req.id;
     const zapId = req.params.zapId;
 
     try {
