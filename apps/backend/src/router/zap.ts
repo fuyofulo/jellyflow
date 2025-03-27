@@ -129,7 +129,10 @@ typedRouter.get("/", authMiddleware, async (req: Request, res: Response) => {
   });
 });
 
-typedRouter.get("/published",authMiddleware,async (req: Request, res: Response) => {
+typedRouter.get(
+  "/published",
+  authMiddleware,
+  async (req: Request, res: Response) => {
     if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -162,8 +165,11 @@ typedRouter.get("/published",authMiddleware,async (req: Request, res: Response) 
   }
 );
 
-typedRouter.get("/unpublished", authMiddleware, async (req: Request, res: Response) => {
-  if (!req.id) {
+typedRouter.get(
+  "/unpublished",
+  authMiddleware,
+  async (req: Request, res: Response) => {
+    if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -195,7 +201,10 @@ typedRouter.get("/unpublished", authMiddleware, async (req: Request, res: Respon
   }
 );
 
-typedRouter.get("/:zapId", authMiddleware, async (req: Request, res: Response) => {
+typedRouter.get(
+  "/:zapId",
+  authMiddleware,
+  async (req: Request, res: Response) => {
     if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -230,7 +239,10 @@ typedRouter.get("/:zapId", authMiddleware, async (req: Request, res: Response) =
   }
 );
 
-typedRouter.post("/:zapId/edit", authMiddleware, async (req: Request, res: Response) => {
+typedRouter.post(
+  "/:zapId/edit",
+  authMiddleware,
+  async (req: Request, res: Response) => {
     if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -350,7 +362,10 @@ typedRouter.post("/:zapId/edit", authMiddleware, async (req: Request, res: Respo
   }
 );
 
-typedRouter.post("/:zapId/toggle-active", authMiddleware, async (req: Request, res: Response) => {
+typedRouter.post(
+  "/:zapId/toggle-active",
+  authMiddleware,
+  async (req: Request, res: Response) => {
     if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -405,7 +420,10 @@ typedRouter.post("/:zapId/toggle-active", authMiddleware, async (req: Request, r
   }
 );
 
-typedRouter.post("/:zapId/delete", authMiddleware, async (req: Request, res: Response) => {
+typedRouter.post(
+  "/:zapId/delete",
+  authMiddleware,
+  async (req: Request, res: Response) => {
     if (!req.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -454,6 +472,153 @@ typedRouter.post("/:zapId/delete", authMiddleware, async (req: Request, res: Res
       console.error("Error deleting zap:", error);
       return res.status(500).json({
         message: "Failed to delete zap",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+);
+
+// Route to get a specific number of runs
+typedRouter.get(
+  "/:zapId/runs/:limit",
+  authMiddleware,
+  async (req: Request, res: Response) => {
+    if (!req.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const userId = req.id;
+    const zapId = req.params.zapId;
+
+    // Get limit from route param, constrain between 1 and 100
+    let limit = 3; // Default fallback
+    const limitParam = Number(req.params.limit);
+    if (!isNaN(limitParam)) {
+      limit = Math.max(1, Math.min(100, limitParam));
+    }
+
+    try {
+      // First verify the zap exists and belongs to the user
+      const zap = await prismaClient.zap.findFirst({
+        where: {
+          id: zapId,
+          userId,
+        },
+      });
+
+      if (!zap) {
+        return res.status(404).json({ message: "Zap not found" });
+      }
+
+      // Fetch the limited zapRuns for this zap
+      // Note: Using id: 'desc' for now since schema doesn't have createdAt
+      // If you add createdAt to ZapRun model, change to orderBy: { createdAt: 'desc' }
+      const zapRuns = await prismaClient.zapRun.findMany({
+        where: {
+          zapId,
+        },
+        orderBy: {
+          // UUIDs are time-ordered with newer UUIDs having higher lexical sorting
+          id: "desc",
+        },
+        take: limit,
+        include: {
+          zapRunOutbox: true,
+        },
+      });
+
+      // Check if any zapRuns were found
+      if (zapRuns.length === 0) {
+        return res.json({
+          message: "No zap runs found",
+          zapRuns: [],
+        });
+      }
+
+      // Ensure metadata is never null (this shouldn't happen based on the schema, but just to be safe)
+      const processedZapRuns = zapRuns.map((run) => ({
+        ...run,
+        metadata: run.metadata ?? {},
+      }));
+
+      return res.json({
+        zapRuns: processedZapRuns,
+        limit,
+        count: zapRuns.length,
+      });
+    } catch (error) {
+      console.error("Error fetching zap runs:", error);
+      return res.status(500).json({
+        message: "Failed to fetch zap runs",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+);
+
+// Route to get all runs
+typedRouter.get(
+  "/:zapId/runs",
+  authMiddleware,
+  async (req: Request, res: Response) => {
+    if (!req.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const userId = req.id;
+    const zapId = req.params.zapId;
+
+    try {
+      // First verify the zap exists and belongs to the user
+      const zap = await prismaClient.zap.findFirst({
+        where: {
+          id: zapId,
+          userId,
+        },
+      });
+
+      if (!zap) {
+        return res.status(404).json({ message: "Zap not found" });
+      }
+
+      // Fetch all zapRuns for this zap
+      // Note: Using id: 'desc' for now since schema doesn't have createdAt
+      // If you add createdAt to ZapRun model, change to orderBy: { createdAt: 'desc' }
+      const zapRuns = await prismaClient.zapRun.findMany({
+        where: {
+          zapId,
+        },
+        orderBy: {
+          // UUIDs are time-ordered with newer UUIDs having higher lexical sorting
+          id: "desc",
+        },
+        include: {
+          zapRunOutbox: true,
+        },
+      });
+
+      // Check if any zapRuns were found
+      if (zapRuns.length === 0) {
+        return res.json({
+          message: "No zap runs found",
+          zapRuns: [],
+        });
+      }
+
+      // Ensure metadata is never null (this shouldn't happen based on the schema, but just to be safe)
+      const processedZapRuns = zapRuns.map((run) => ({
+        ...run,
+        metadata: run.metadata ?? {},
+      }));
+
+      return res.json({
+        zapRuns: processedZapRuns,
+        count: zapRuns.length,
+      });
+    } catch (error) {
+      console.error("Error fetching all zap runs:", error);
+      return res.status(500).json({
+        message: "Failed to fetch all zap runs",
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }
