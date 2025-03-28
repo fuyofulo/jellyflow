@@ -43,12 +43,13 @@ typedApp.post(
           data: {
             zapId: zapId,
             metadata: body,
+            // createdAt will be automatically set to current time
           },
         });
-        console.log(`ZapRun created with ID: ${run.id}`);
+        console.log(`ZapRun created with ID: ${run.id} at ${run.createdAt}`);
 
         // creating an outbox entry for the zaprun
-        await tx.zapRunOutbox.create({
+        const outbox = await tx.zapRunOutbox.create({
           data: {
             zapRunId: run.id,
           },

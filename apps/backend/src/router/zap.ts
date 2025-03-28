@@ -511,16 +511,15 @@ typedRouter.get(
       }
 
       // Fetch the limited zapRuns for this zap
-      // Note: Using id: 'desc' for now since schema doesn't have createdAt
-      // If you add createdAt to ZapRun model, change to orderBy: { createdAt: 'desc' }
+      // Using both createdAt and id for reliable ordering
       const zapRuns = await prismaClient.zapRun.findMany({
         where: {
           zapId,
         },
-        orderBy: {
-          // UUIDs are time-ordered with newer UUIDs having higher lexical sorting
-          id: "desc",
-        },
+        orderBy: [
+          { createdAt: "desc" }, // Primary sort by createdAt
+          { id: "desc" }, // Secondary sort by id as fallback
+        ],
         take: limit,
         include: {
           zapRunOutbox: true,
@@ -582,16 +581,15 @@ typedRouter.get(
       }
 
       // Fetch all zapRuns for this zap
-      // Note: Using id: 'desc' for now since schema doesn't have createdAt
-      // If you add createdAt to ZapRun model, change to orderBy: { createdAt: 'desc' }
+      // Using both createdAt and id for reliable ordering
       const zapRuns = await prismaClient.zapRun.findMany({
         where: {
           zapId,
         },
-        orderBy: {
-          // UUIDs are time-ordered with newer UUIDs having higher lexical sorting
-          id: "desc",
-        },
+        orderBy: [
+          { createdAt: "desc" }, // Primary sort by createdAt
+          { id: "desc" }, // Secondary sort by id as fallback
+        ],
         include: {
           zapRunOutbox: true,
         },
