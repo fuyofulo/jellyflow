@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 import { JWT_PASSWORD } from "../config";
 import { SignInSchema, SignupSchema } from "../types";
 import { PrismaClient } from ".prisma/client";
+import { generateVerificationCode, storeVerificationCode } from "./verify";
+import { sendEmail } from "../services/email";
 
 const prismaClient = new PrismaClient();
 const router = Router();
@@ -35,18 +37,44 @@ typedRouter.post("/signup", async (req: Request, res: Response) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    // Create new user
-    const hashedPassword = await bcrypt.hash(parsedData.data!.password, 10);
-    await prismaClient.user.create({
-      data: {
-        email: parsedData.data.email,
-        password: hashedPassword,
-        name: parsedData.data.name,
-        verified: false,
-      },
+    // Generate verification code
+    const verificationCode = generateVerificationCode();
+
+    // Store user data and verification code
+    storeVerificationCode(parsedData.data.email, verificationCode, {
+      email: parsedData.data.email,
+      password: parsedData.data.password,
+      name: parsedData.data.name,
     });
-    console.log(`${parsedData.data.name} just signed up with email ${parsedData.data.email}`);
-    return res.status(201).json({ message: "User created successfully" });
+
+    // Send verification email
+    try {
+      const emailBody = `
+        <h1>Email Verification</h1>
+        <p>Hello ${parsedData.data.name},</p>
+        <p>Thank you for signing up to Jellyflow. Your verification code is:</p>
+        <h2>${verificationCode}</h2>
+        <p>This code will expire in 30 minutes.</p>
+      `;
+
+      await sendEmail(
+        parsedData.data.email,
+        "Verify your email address to get started with Jellyflow",
+        emailBody,
+        "Jellyflow"
+      );
+
+      console.log(`Verification email sent to ${parsedData.data.email}`);
+      return res.status(200).json({
+        message: "Verification code sent to your email",
+        email: parsedData.data.email,
+      });
+    } catch (emailError) {
+      console.error("Error sending verification email:", emailError);
+      return res
+        .status(500)
+        .json({ message: "Failed to send verification email" });
+    }
   } catch (error) {
     console.error("Signup error:", error);
     return res.status(500).json({ message: "Signup failed" });
@@ -83,7 +111,9 @@ typedRouter.post("/signin", async (req: Request, res: Response) => {
   );
 
   if (!passwordMatch) {
-    console.log(`someone just tried to sign in with email ${parsedData.data.email}`);
+    console.log(
+      `someone just tried to sign in with email ${parsedData.data.email}`
+    );
     return res.status(401).json({
       message: "Invalid username or password",
     });
