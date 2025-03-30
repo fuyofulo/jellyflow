@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/logical_services/checkactionevent.ts","./src/logical_services/parser.ts","./src/services/email/sendemail.ts"],"version":"5.8.2"}
+{"root":["./src/index.ts","./src/logical_services/checkactionevent.ts","./src/logical_services/parser.ts","./src/services/email/sendemail.ts","./src/services/telegram/gettelegramupdate.ts"],"version":"5.8.2"}

@@ -1,4 +1,5 @@
 import { sendEmail } from "../services/email/sendEmail";
+import { getTelegramUpdate } from "../services/telegram/getTelegramUpdate";
 
 // Interface for action handlers
 interface ActionHandler {
@@ -19,7 +20,11 @@ interface ActionResult {
 // add actions and functions here
 const actionHandlers: Record<string, ActionHandler> = {
   sendEmail: sendEmail,
+  getTelegramUpdate: getTelegramUpdate,
 };
+
+// For easy reference, export a list of all supported action events
+export const supportedActionEvents = Object.keys(actionHandlers);
 
 /**
  * Process an action based on its event type
@@ -30,14 +35,12 @@ const actionHandlers: Record<string, ActionHandler> = {
  * @param zapRunMetadata Optional metadata from the zapRun, to avoid fetching again
  * @returns ActionResult with success status and any relevant data
  */
-export async function processAction(
+export const processAction = async (
   actionEvent: string,
   metadata: any,
   zapRunId: string,
   zapRunMetadata?: Record<string, any>
-): Promise<ActionResult> {
-  console.log(`Processing action event: ${actionEvent}`);
-
+): Promise<ActionResult> => {
   // Check if we have a handler for this action type
   const handler = actionHandlers[actionEvent];
 
@@ -62,7 +65,4 @@ export async function processAction(
         error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
-}
-
-// For easy reference, export a list of all supported action events
-export const supportedActionEvents = Object.keys(actionHandlers);
+};

@@ -1,1 +1,1 @@
-{"root":["./src/config.ts","./src/index.ts","./src/middleware.ts","./src/router/action.ts","./src/router/trigger.ts","./src/router/user.ts","./src/router/verify.ts","./src/router/zap.ts","./src/services/email.ts","./src/types/index.ts"],"version":"5.8.2"}
+{"root":["./src/config.ts","./src/index.ts","./src/middleware.ts","./src/router/action.ts","./src/router/trigger.ts","./src/router/user.ts","./src/router/verify.ts","./src/router/zap.ts","./src/services/email.ts","./src/services/verifytelegram.ts","./src/types/index.ts"],"version":"5.8.2"}

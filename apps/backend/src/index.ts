@@ -6,6 +6,7 @@ import { PrismaClient } from "@prisma/client";
 import { triggerRouter } from "./router/trigger";
 import { actionRouter } from "./router/action";
 import { verifyRouter } from "./router/verify";
+import telegramRouter from "./services/verifyTelegram";
 import cors from "cors";
 
 const app = express();
@@ -19,5 +20,6 @@ app.use("/api/v1/zap", zapRouter);
 app.use("/api/v1/trigger", triggerRouter);
 app.use("/api/v1/action", actionRouter);
 app.use("/api/v1/verify", verifyRouter);
+app.use("/api/v1/telegram", telegramRouter);
 
 app.listen(3033);
