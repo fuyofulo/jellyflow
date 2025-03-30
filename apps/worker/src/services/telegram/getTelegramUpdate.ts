@@ -3,9 +3,6 @@ const express = require("express");
 const axios = require("axios");
 import { parseObject } from "../../logical_services/parser";
 
-const app = express();
-app.use(express.json());
-
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
@@ -158,8 +155,3 @@ export async function getTelegramUpdate(
     };
   }
 }
-
-// Send a test message when the server starts
-sendTelegramMessage(TELEGRAM_CHAT_ID, "🚀 Bot is now running!");
-
-app.listen(7000, () => console.log("✅ Server running on port 7000"));
