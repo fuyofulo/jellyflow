@@ -12,21 +12,44 @@ if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
   );
 }
 
-export async function sendTelegramMessage(chatId: string, message: string) {
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+/**
+ * Base function to make Telegram API calls
+ * @param method The Telegram API method to call
+ * @param data The data to send with the request
+ * @returns API response
+ */
+export async function callTelegramAPI(method: string, data: any = {}) {
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${method}`;
 
   try {
-    const response = await axios.post(url, {
-      chat_id: chatId,
-      text: message,
-    });
-
-    console.log("✅ Message sent:", response.data);
+    const response = await axios.post(url, data);
     return response.data;
   } catch (error: any) {
-    console.error("❌ Error sending message:", error.response?.data || error);
+    console.error(
+      `❌ Error calling Telegram API (${method}):`,
+      error.response?.data || error
+    );
     throw error;
   }
+}
+
+/**
+ * Sends a message to a Telegram chat
+ */
+export async function sendTelegramMessage(chatId: string, message: string) {
+  console.log(`✅ Sending message to chat ID: ${chatId}`);
+  return await callTelegramAPI("sendMessage", {
+    chat_id: chatId,
+    text: message,
+  });
+}
+
+/**
+ * Gets updates from Telegram
+ */
+export async function getTelegramUpdates() {
+  console.log("✅ Getting Telegram updates");
+  return await callTelegramAPI("getUpdates");
 }
 
 interface ActionData {
