@@ -9,7 +9,12 @@
     "check-types": "turbo run check-types",
     "db:generate": "prisma generate --schema=packages/database/prisma/schema.prisma",
     "db:migrate:dev": "prisma migrate dev --schema=packages/database/prisma/schema.prisma",
-    "db:studio": "prisma studio --schema=packages/database/prisma/schema.prisma"
+    "db:studio": "prisma studio --schema=packages/database/prisma/schema.prisma",
+    "start": "turbo run start",
+    "start:backend": "npm run start --workspace=be",
+    "start:worker": "npm run start --workspace=worker",
+    "start:sweeper": "npm run start --workspace=sweeper",
+    "start:hooks": "npm run start --workspace=hooks"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
@@ -42,7 +47,7 @@
     "kafkajs": "^2.2.4",
     "nodemailer": "^6.10.0",
     "passport-local": "^1.0.0",
-    "prisma": "^6.5.0",
+    "prisma": "^5.22.0",
     "zod": "^3.24.2"
   },
   "description": "This Turborepo starter is maintained by the Turborepo core team.",

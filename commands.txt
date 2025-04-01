@@ -8,7 +8,7 @@ for kafka:
     go inside docker container to create topic (queue) and then producers and consumers:
     docker exec -it {container-ID} /bin/bash
     cd /opt/kafka/bin
-    create topic:    ./kafka-topics.sh --create --topic zap-events quickstart-events --bootstrap-server localhost:9092
+    create topic:    
     create producer: ./kafka-console-producer.sh --topic zap-events quickstart-events --bootstrap-server localhost:9092
     create consumer: ./kafka-console-consumer.sh --topic zap-events quickstart-events --from-beginning --bootstrap-server localhost:9092
 

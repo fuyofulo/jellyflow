@@ -1,4 +1,5 @@
 // src/index.ts
+import "dotenv/config"; // Load environment variables from .env file
 import express from "express";
 import { userRouter } from "./router/user";
 import { zapRouter } from "./router/zap";

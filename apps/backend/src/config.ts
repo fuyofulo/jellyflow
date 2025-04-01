@@ -1,1 +1,1 @@
-export const JWT_PASSWORD = process.env.JWT_PASSWORD || "helloworld"
+export const JWT_PASSWORD = process.env.JWT_PASSWORD 
