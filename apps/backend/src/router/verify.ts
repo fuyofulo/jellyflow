@@ -3,7 +3,9 @@ import { PrismaClient } from ".prisma/client";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { JWT_PASSWORD } from "../config";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Initialize Prisma client
 const prismaClient = new PrismaClient();

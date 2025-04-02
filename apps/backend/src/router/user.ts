@@ -6,6 +6,9 @@ import { SignInSchema, SignupSchema } from "../types";
 import { PrismaClient } from ".prisma/client";
 import { generateVerificationCode, storeVerificationCode } from "./verify";
 import { sendEmail } from "../services/email";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const prismaClient = new PrismaClient();
 const router = Router();
