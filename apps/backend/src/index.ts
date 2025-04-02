@@ -14,7 +14,19 @@ const app = express();
 
 // Common middleware
 app.use(express.json());
-app.use(cors());
+// Configure CORS to allow requests from both frontend sources
+app.use(
+  cors({
+    origin: [
+      "https://jellyflow.vercel.app",
+      "http://localhost:3000",
+      "http://49.43.229.57:3000",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/zap", zapRouter);
@@ -23,4 +35,6 @@ app.use("/api/v1/action", actionRouter);
 app.use("/api/v1/verify", verifyRouter);
 app.use("/api/v1/telegram", telegramRouter);
 
-app.listen(3033);
+app.listen(3033, "0.0.0.0", () => {
+  console.log("Backend server is listening on port 3033");
+});

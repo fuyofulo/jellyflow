@@ -1,11 +1,25 @@
 import express, { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import cors from "cors";
 
 const client = new PrismaClient();
 
 const app = express();
 const typedApp = app as any;
 app.use(express.json());
+// Configure CORS to allow requests from both frontend sources
+app.use(
+  cors({
+    origin: [
+      "https://jellyflow.vercel.app",
+      "http://localhost:3000",
+      "http://49.43.229.57:3000",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 typedApp.post(
   "/webhook/catch/:userId/:zapId",
@@ -69,6 +83,6 @@ typedApp.post(
   }
 );
 
-app.listen(4000, () => {
+app.listen(4000, "0.0.0.0", () => {
   console.log("Project is active at port 4000");
 });
