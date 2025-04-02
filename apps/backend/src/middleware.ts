@@ -1,6 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_PASSWORD } from "./config";
+
+const pwd = process.env.JWT_PASSWORD;
+
+if (!pwd) {
+  throw new Error("JWT_PASSWORD is not set");
+}
 
 // Extend Express Request type to include id
 declare global {
@@ -19,7 +24,7 @@ export function authMiddleware(
   const token = req.headers.authorization as unknown as string;
 
   try {
-    const payload = jwt.verify(token, JWT_PASSWORD) as { id: string };
+    const payload = jwt.verify(token, pwd!) as unknown as { id: string };
     req.id = payload.id;
     next();
   } catch (e) {
