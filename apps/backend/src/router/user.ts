@@ -2,7 +2,6 @@ import { Router, Request, Response } from "express";
 import { authMiddleware } from "../middleware";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { JWT_PASSWORD } from "../config";
 import { SignInSchema, SignupSchema } from "../types";
 import { PrismaClient } from ".prisma/client";
 import { generateVerificationCode, storeVerificationCode } from "./verify";
@@ -11,6 +10,13 @@ import { sendEmail } from "../services/email";
 const prismaClient = new PrismaClient();
 const router = Router();
 const typedRouter = router as any;
+
+const pwd = process.env.JWT_PASSWORD;
+
+if (!pwd) {
+  throw new Error("JWT_PASSWORD is not set");
+}
+
 
 typedRouter.post("/signup", async (req: Request, res: Response) => {
   const body = req.body;
@@ -119,7 +125,7 @@ typedRouter.post("/signin", async (req: Request, res: Response) => {
     });
   }
 
-  const token = jwt.sign({ id: user.id }, JWT_PASSWORD);
+  const token = jwt.sign({ id: user.id }, pwd);
   console.log(`${user.name} just signed in with email ${user.email}`);
   res.json({
     message: "Login successful",

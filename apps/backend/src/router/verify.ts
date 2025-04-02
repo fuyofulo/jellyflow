@@ -10,6 +10,12 @@ const prismaClient = new PrismaClient();
 const router = Router();
 const typedRouter = router as any;
 
+const pwd = process.env.JWT_PASSWORD;
+
+if (!pwd) {
+  throw new Error("JWT_PASSWORD is not set");
+}
+
 // Map to store pending verifications (email -> {code, userData})
 // In production, you might want to use Redis or database storage
 const pendingVerifications = new Map<
@@ -99,7 +105,7 @@ typedRouter.post("/verify-email", async (req: Request, res: Response) => {
     pendingVerifications.delete(email);
 
     // Generate authentication token
-    const token = jwt.sign({ id: newUser.id }, JWT_PASSWORD);
+    const token = jwt.sign({ id: newUser.id }, pwd);
 
     return res.status(201).json({
       message: "Email verified and user created successfully",
