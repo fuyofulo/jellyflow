@@ -22,7 +22,6 @@ export async function parseTemplate(
     console.log(`Using provided metadata for zapRun: ${zapRunId}`);
     metadata = zapRunMetadata;
   } else {
-    // Fetch the ZapRun metadata with additional logging
     console.log(`Fetching metadata for zapRun: ${zapRunId}`);
     const zapRun = await client.zapRun.findUnique({
       where: { id: zapRunId },
@@ -32,12 +31,10 @@ export async function parseTemplate(
       throw new Error(`ZapRun with ID ${zapRunId} not found`);
     }
 
-    // Log the metadata to debug
     console.log("ZapRun metadata:", zapRun.metadata);
     metadata = zapRun.metadata as Record<string, any>;
   }
 
-  // Replace all {{var}} occurrences with their values from metadata
   return template.replace(/\{\{([^}]+)\}\}/g, (match, varName) => {
     const trimmedVarName = varName.trim();
     console.log(`Replacing template variable: ${trimmedVarName}`);
@@ -56,7 +53,7 @@ export async function parseTemplate(
       ) {
         const value = metadata[arrayName][arrayIndex];
         console.log(`Found array value for ${trimmedVarName}:`, value);
-        return value.toString();
+        return typeof value === "string" ? value : JSON.stringify(value);
       } else {
         console.warn(
           `Array access out of bounds or not an array: ${trimmedVarName}`
@@ -67,14 +64,12 @@ export async function parseTemplate(
 
     // Check if the variable exists in metadata
     if (metadata[trimmedVarName] !== undefined) {
-      console.log(
-        `Found value for ${trimmedVarName}:`,
-        metadata[trimmedVarName]
-      );
-      return metadata[trimmedVarName].toString();
+      const value = metadata[trimmedVarName];
+      console.log(`Found value for ${trimmedVarName}:`, value);
+      return typeof value === "string" ? value : JSON.stringify(value);
     }
 
-    // If nested object path like "user.name", traverse the object
+    // Handle nested paths like user.name
     if (trimmedVarName.includes(".")) {
       const parts = trimmedVarName.split(".");
       let value = metadata;
@@ -84,18 +79,17 @@ export async function parseTemplate(
         path += (path ? "." : "") + part;
         if (value === undefined || value === null) {
           console.log(`Path ${path} not found in metadata`);
-          return match; // Keep original if path doesn't exist
+          return match;
         }
         value = value[part];
       }
 
       if (value !== undefined && value !== null) {
         console.log(`Found value for ${trimmedVarName} (nested):`, value);
-        return value.toString();
+        return typeof value === "string" ? value : JSON.stringify(value);
       }
     }
 
-    // If variable not found, return the original template marker
     console.warn(
       `⚠️ Variable ${trimmedVarName} not found in metadata for zapRun ${zapRunId}`
     );
@@ -116,12 +110,10 @@ export async function parseObject(
   zapRunId: string,
   zapRunMetadata?: Record<string, any>
 ): Promise<any> {
-  // Handle null or undefined
   if (obj === null || obj === undefined) {
     return obj;
   }
 
-  // Handle primitive types
   if (typeof obj !== "object") {
     if (typeof obj === "string" && obj.includes("{{")) {
       return await parseTemplate(obj, zapRunId, zapRunMetadata);
@@ -129,14 +121,12 @@ export async function parseObject(
     return obj;
   }
 
-  // Handle arrays
   if (Array.isArray(obj)) {
     return Promise.all(
       obj.map((item) => parseObject(item, zapRunId, zapRunMetadata))
     );
   }
 
-  // Handle objects
   const result: Record<string, any> = {};
   for (const key of Object.keys(obj)) {
     result[key] = await parseObject(obj[key], zapRunId, zapRunMetadata);
