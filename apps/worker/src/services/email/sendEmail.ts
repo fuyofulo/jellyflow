@@ -120,6 +120,7 @@ export async function sendEmail(
 
     // Parse all template variables in the data
     const parsedData = await parseObject(data, zapRunId, zapRunMetadata);
+    console.log(parsedData);
 
     console.log(
       "[EMAIL] Parsed data after template replacement:",
@@ -127,6 +128,9 @@ export async function sendEmail(
     );
 
     const { recipients, subject, body, fromName } = parsedData;
+    console.log("hello world welcome 123");
+    console.log(body);
+    console.log("hello world welcome 123");
 
     if (
       !recipients ||
