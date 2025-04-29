@@ -18,7 +18,7 @@ const createTransporter = () => {
   }
 
   // Log configuration (without credentials)
-  console.log(`[EMAIL SERVICE] Initializing Gmail service for: ${email}`);
+  //console.log(`[EMAIL SERVICE] Initializing Gmail service for: ${email}`);
 
   return nodemailer.createTransport({
     service: "gmail",
@@ -103,10 +103,10 @@ export async function sendEmail(
     // Extract email data from metadata
     const { data } = metadata;
 
-    console.log(
-      "[EMAIL] Original data before parsing:",
-      JSON.stringify(data, null, 2)
-    );
+    // console.log(
+    //   "[EMAIL] Original data before parsing:",
+    //   JSON.stringify(data, null, 2)
+    // );
 
     if (zapRunMetadata) {
       console.log("[EMAIL] Using provided zapRunMetadata for parsing");
@@ -120,12 +120,11 @@ export async function sendEmail(
 
     // Parse all template variables in the data
     const parsedData = await parseObject(data, zapRunId, zapRunMetadata);
-    console.log(parsedData);
 
-    console.log(
-      "[EMAIL] Parsed data after template replacement:",
-      JSON.stringify(parsedData, null, 2)
-    );
+    // console.log(
+    //   "[EMAIL] Parsed data after template replacement:",
+    //   JSON.stringify(parsedData, null, 2)
+    // );
 
     const { recipients, subject, body, fromName } = parsedData;
     console.log("hello world welcome 123");
@@ -150,9 +149,9 @@ export async function sendEmail(
 
     // Log what we're sending
     const recipientList = Array.isArray(recipients) ? recipients : [recipients];
-    console.log(`[EMAIL] Sending email to ${recipientList.join(", ")}`);
-    console.log(`[EMAIL] Subject: ${subject}`);
-    console.log(`[EMAIL] Body length: ${body.length} characters`);
+    // console.log(`[EMAIL] Sending email to ${recipientList.join(", ")}`);
+    // console.log(`[EMAIL] Subject: ${subject}`);
+    // console.log(`[EMAIL] Body length: ${body.length} characters`);
 
     // Send the actual email
     const mailResult = await sendMail(
@@ -162,9 +161,9 @@ export async function sendEmail(
       fromName || "Jelly Flow"
     );
 
-    console.log(
-      `[EMAIL] Email sent successfully with messageId: ${mailResult.messageId}`
-    );
+    // console.log(
+    //   `[EMAIL] Email sent successfully with messageId: ${mailResult.messageId}`
+    // );
 
     return {
       success: true,

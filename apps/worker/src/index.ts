@@ -68,8 +68,8 @@ async function main() {
       const zapRunMetadata = zapRunDetails?.metadata as Record<string, any>;
       const actionMetadata = currentAction.metadata as any;
 
-      console.log("Current action:", currentAction);
-      console.log("ZapRun metadata:", zapRunMetadata);
+      // console.log("Current action:", currentAction);
+      // console.log("ZapRun metadata:", zapRunMetadata);
 
       // Process the action using our new system
       const actionEvent = actionMetadata.actionEvent as string;
