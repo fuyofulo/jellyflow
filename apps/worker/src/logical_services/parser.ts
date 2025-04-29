@@ -66,7 +66,9 @@ export async function parseTemplate(
     if (metadata[trimmedVarName] !== undefined) {
       const value = metadata[trimmedVarName];
       console.log(`Found value for ${trimmedVarName}:`, value);
+      console.log("hello world welcome 123");
       console.log(value);
+      console.log("hello world welcome 123");
       return typeof value === "string" ? value : JSON.stringify(value);
     }
 
